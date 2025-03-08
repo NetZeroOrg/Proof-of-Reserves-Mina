@@ -2,6 +2,7 @@
   "name": "circuits",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "test": "jest --config jest.config.ts",
     "test:watch": "jest --config jest.config.ts --watch",
@@ -10,7 +11,13 @@
   },
   "dependencies": {
     "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.13.8",
+    "axios": "^1.8.1",
+    "bech32": "^2.0.0",
+    "bitcoinjs-lib": "^6.1.7",
+    "bs58check": "^4.0.0",
+    "mina-attestations": "^0.4.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

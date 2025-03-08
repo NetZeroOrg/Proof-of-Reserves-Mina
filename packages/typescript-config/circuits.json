@@ -23,6 +23,7 @@
         "strictFunctionTypes": true,
         "types": [
             "jest",
+            "node"
         ],
     }
 }
