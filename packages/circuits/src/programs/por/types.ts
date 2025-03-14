@@ -1,11 +1,29 @@
-import { Bool, Field, Provable, Struct } from "o1js";
-import { NUM_ASSETS } from ".";
+import { Bool, CanonicalForeignField, createForeignCurve, Crypto, Field, Provable, Struct, Group } from "o1js";
+import { NUM_ACTUAL_ADDRESS, NUM_PUBLIC_ADDRESS, NUM_ASSETS, } from ".";
+import { address } from "bitcoinjs-lib";
 
-export class ProofOfAssetsPublicInput extends Struct({
-    addresses: Provable.Array(Field, NUM_ASSETS),
-    balances: Provable.Array(Field, NUM_ASSETS)
+export const THRESHOLD_MULT_EXTRA_ADDR = 2
+
+export class PublicAddress extends Struct({
+    addresses: Provable.Array(Field, NUM_PUBLIC_ADDRESS)
+}) { }
+
+export class Balances extends Struct({
+    balances: Provable.Array(Field, NUM_PUBLIC_ADDRESS),
+}) { }
+
+export class ProofOFAssetPublicInput extends Struct({
+    addresses: Provable.Array(Field, NUM_PUBLIC_ADDRESS),
+    balances: Provable.Array(Field, NUM_PUBLIC_ADDRESS),
+    selectorArrayCommitment: Group,
 }) { }
 
 export class ProofOfAssetsPrivateInput extends Struct({
     selectorArray: Provable.Array(Bool, NUM_ASSETS),
+    blidingFactor: Field
+}) { }
+
+
+export class SecretKeys extends Struct({
+    secretKeys: Provable.Array(Field, NUM_ACTUAL_ADDRESS)
 }) { }
