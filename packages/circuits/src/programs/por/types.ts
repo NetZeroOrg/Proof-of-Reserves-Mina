@@ -1,8 +1,5 @@
-import { Bool, CanonicalForeignField, createForeignCurve, Crypto, Field, Provable, Struct, Group } from "o1js";
+import { Bool, Field, Provable, Struct, Group } from "o1js";
 import { NUM_ACTUAL_ADDRESS, NUM_PUBLIC_ADDRESS, NUM_ASSETS, } from ".";
-import { address } from "bitcoinjs-lib";
-
-export const THRESHOLD_MULT_EXTRA_ADDR = 2
 
 export class PublicAddress extends Struct({
     addresses: Provable.Array(Field, NUM_PUBLIC_ADDRESS)

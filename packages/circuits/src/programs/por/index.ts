@@ -1,5 +1,5 @@
 // You can put logic in different files if you want
-import { createForeignCurve, Crypto, ZkProgram, Field, Gadgets, Group, Poseidon, PrivateKey, Proof, Provable, PublicKey, } from "o1js";
+import { createForeignCurve, Crypto, ZkProgram, Field, Gadgets, Group, Poseidon, PrivateKey, Proof, Provable, PublicKey, SelfProof, method, } from "o1js";
 import { ProofOFAssetPublicInput, ProofOfAssetsPrivateInput, PublicAddress, SecretKeys } from "./types.js";
 export const NUM_ASSETS = Number(process.env.NUM_ASSETS) ?? 100
 export const NUM_ACTUAL_ADDRESS = Number(process.env!.NUM_ADDRESS)
@@ -14,7 +14,7 @@ class Secp256k1 extends createForeignCurve(Crypto.CurveParams.Secp256k1) { }
 export async function proofOfAssets(
     publicInput: ProofOFAssetPublicInput,
     privateInput: ProofOfAssetsPrivateInput,
-    selectorArrayProof: Proof<PublicAddress, Group>
+    selectorArrayProof: SelectorArrayProof
 ): Promise<{ publicOutput: Group }> {
     // check that keyPair is Valid
     for (let i = 0; i < NUM_PUBLIC_ADDRESS; i++) {
@@ -90,14 +90,28 @@ export const selectorZkProgram = ZkProgram({
     }
 })
 
+export class SelectorArrayProof extends ZkProgram.Proof(selectorZkProgram) { }
+
 export const proofOfAssetProgram = ZkProgram({
     name: "proof of asset",
     publicInput: ProofOFAssetPublicInput,
     publicOutput: Group,
     methods: {
-        proofOfAssets: {
-            privateInputs: [ProofOfAssetsPrivateInput, Proof<PublicAddress, Group>],
+        base: {
+            privateInputs: [ProofOfAssetsPrivateInput, SelectorArrayProof],
             method: proofOfAssets,
         },
+        recursive: {
+            privateInputs: [ProofOfAssetsPrivateInput, SelectorArrayProof, SelfProof<PublicAddress, Group>],
+            method: async (pubInput: ProofOFAssetPublicInput, privateInput: ProofOfAssetsPrivateInput, selectorArrayProof: Proof<PublicAddress, Group>, proof: SelfProof<PublicAddress, Group>): Promise<{ publicOutput: Group }> => {
+                proof.verify()
+                const { publicOutput } = await proofOfAssets(pubInput, privateInput, selectorArrayProof)
+                return {
+                    publicOutput: proof.publicOutput.add(publicOutput),
+                }
+            }
+        }
     }
 })
+
+export class ProofOfAsset extends ZkProgram.Proof(proofOfAssetProgram) { }
