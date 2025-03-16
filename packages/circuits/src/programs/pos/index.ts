@@ -4,23 +4,25 @@
 // we check if (l - b) * G = liabilities commitment - asset commitment
 // and then we do a rangeCheck on (l - b) * G as we already know that the l is range checked and b is also range checked to be between 0 and 2^256
 
-import { Field, Group, Poseidon } from "o1js";
+import { Field, Group, Poseidon, Proof, ZkProgram } from "o1js";
 import { ProofOfSolvencyPublicInputs } from "./types";
+import { ProofOfAsset } from "../por";
 
 const proofOfSolvency = async (
     publicInputs: ProofOfSolvencyPublicInputs,
+    assetProof: ProofOfAsset,
+    liabilitiesRangeCheckProof: Proof<unknown, unknown>,
     liabiltiesBlindingFactor: Field,
     assetBlindingFactor: Field,
     liabilityValue: Field,
     assetsValue: Field
 ) => {
-
     // That the proof of asset is for the correct asset commitment and it also verifies that the balance is range checked
-    publicInputs.assetProof.verify()
-    publicInputs.assetProof.publicOutput.assertEquals(publicInputs.assetsCommitment)
+    assetProof.verify()
+    assetProof.publicOutput.assertEquals(publicInputs.assetsCommitment)
 
     // that l is range checked
-    publicInputs.liabiltiesRangeCheckProof.verify()
+    liabilitiesRangeCheckProof.verify()
 
     liabilityValue.assertGreaterThan(assetsValue)
 
@@ -36,5 +38,18 @@ const proofOfSolvency = async (
 
     // check that the net commitment is equal to the computed net commitment
     computedNetCommitment.assertEquals(netCommitmentWithoutBliding)
-
 }
+
+export const proofOfSolvencyProgram = ZkProgram({
+    name: "proof of solvency",
+    publicInput: ProofOfSolvencyPublicInputs,
+    methods: {
+        proofOfSolvency: {
+            privateInputs: [ProofOfAsset, Proof<unknown, unknown>, Field, Field, Field, Field],
+            method: proofOfSolvency
+        }
+    },
+})
+
+
+export class ProofOfSolvency extends ZkProgram.Proof(proofOfSolvencyProgram) { }

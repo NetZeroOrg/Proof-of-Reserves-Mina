@@ -1,9 +1,6 @@
-import { Group, Proof, Struct } from "o1js";
-import { ProofOfAsset } from "../por";
+import { Group, Struct } from "o1js";
 
 export class ProofOfSolvencyPublicInputs extends Struct({
     liabilitiesCommitment: Group,
     assetsCommitment: Group,
-    liabiltiesRangeCheckProof: Proof<void, void>,
-    assetProof: ProofOfAsset
 }) { }
